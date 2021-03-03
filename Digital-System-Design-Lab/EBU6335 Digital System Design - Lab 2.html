@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<!-- saved from url=(0058)http://webprojects.eecs.qmul.ac.uk/mtang/EBU6335/lab2.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<title>EBU6335 Digital System Design - Lab 2</title>
+<!--link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro&display=swap" rel="stylesheet"-->
+<style>
+body {
+    font-family: 'Source Sans Pro', Arial, sans-serif;
+}
+h1 {
+    font-size: 1.8em;
+    #color: rgb(22, 51, 111);
+}
+h2 {
+    font-size: 1.6em;
+}
+hr {
+    border: 1px solid black; #rgb(21, 51, 111);
+}
+table, th, td {
+    border: 1px solid black;
+    padding: 4px;
+    border-collapse: collapse;
+}
+
+.clearfix {
+    overflow: auto;
+}
+</style>
+</head>
+<body>
+<div class="clearfix">
+    <img src="./EBU6335 Digital System Design - Lab 2_files/QM_logo_black_large.png" style="float: right;" height="85px">
+    <h1>School of Electronic Engineering and Computer Science<br>
+    EBU6335: Digital System Design (QMUL-BUPT JP)</h1>
+</div>
+
+<hr>
+<h2>Lab 2 - Simple Arithmetic Machine (SAM) Design</h2>
+
+<h3 id="overview">Overview &amp; Learning Objectives</h3>
+
+<p>The aim of this set of labs is to continue the practice of 
+a complete FPGA design cycled - design entry and synthesis,
+simulation, implementation and board programming - using the VHDL language and
+the designated CAD tools.</p>
+<p>You will also work with the modelling of finite state machines (FSM) using
+the VHDL language. This will allow you to understand how a bigger problem can be
+solved via smaller computation steps.</p>
+After completing these experiments you should be able to:
+<ul>
+<li>Infer and connect sequential blocks, e.g. flip-flops and registers to other
+part of your system.</li>
+<li>Design and simulate finite state machines (FSM) in VHDL.</li>
+<li>Write testbenches to test your FSM.</li>
+<li>Implement and download these designs into an FPGA component using CAD tools.</li>
+</ul>
+<!--
+By the end of these four lab sessions you will have the knowledge to build a
+medium-sized digital system that solves an arithmetic problem.</p-->
+
+<h3 id="spec">Simple Arithmetic Machine (SAM): Specification</h3>
+
+<p>Simple Arithmetic Machine (SAM) is sequential digital system to compute a
+fixed arithmetic functions. The actual function depends on the application and
+its complexity varies. When the function is more complicated, generally it takes
+longer (i.e. more clock cycles) and more hardware resources (i.e. more logic and
+registers) to compute the answer.</p>
+
+<p>In this lab exercise, you are asked to design a 8-bit SAM for exactly two
+operands using the VHDL language. 
+It has two 8-bit input operands (A and B, both signed), a start control in bit (Start), a
+done control bit (Done), an error indicator (Err, optional) and a 8-bit main output (Y). 
+A block diagram for the SAM is shown below:</p>
+<center><img width="350px" src="./EBU6335 Digital System Design - Lab 2_files/lab2_SAM_block.png"></center>
+
+<p><b>You can assume both A and B are signed numbers represented by 2's complement.</b></p>
+
+<p id="func"><b>Required Function</b><br>
+Please enter your BUPT student ID to customise the function for your
+SAM (and it will be different from your classmates):</p>
+<form>
+BUPT ID: <input type="text" id="buptID" size="15" maxlength="10"> 
+&nbsp;   <button type="button" name="submit" onclick="genFunc()">Show my function</button> 
+</form>
+
+<script>
+function genFunc() {
+    buptID = document.getElementById("buptID").value;
+    if (buptID.length != 10) {
+        alert("Please check your BUPT ID!");
+        return;
+    } else {
+        var xmlhttp = new XMLHttpRequest();
+        xmlhttp.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                document.getElementById("funcText").innerHTML = this.responseText;
+            }
+        };
+        xmlhttp.open("GET", "lab2_sam.php?id=" + buptID, true);
+        xmlhttp.send();
+    }
+}
+</script>
+<p>Your function is: </p><div id="funcText">Y = (A + B - 1) / 2</div><br>
+For the error indicator (Err), it indicates whether the output Y is
+numerically incorrect in cases like overflow. The implementation of this signal
+is <b>optional</b>.<p></p>
+
+<p>
+<b>Quality of your VHDL code:</b> keeping a good structure of your VHDL code (e.g.
+consistent identation, proper identifier naming, etc.) and writing concise
+comments help you and others to understand the VHDL models and codes more
+easily. 
+Please spend a minute to check the <a href="http://webprojects.eecs.qmul.ac.uk/mtang/EBU6335/lab2.html#rubric">rubric</a> for our
+assessment in demonstrations.
+</p>
+
+<h3 id="task1">Task 1: To design Finite State Machine (FSM) for the required
+function</h3>
+<p>
+The FSM controls the ALU to carry the right operations by providing function
+select signals at different states, so that the final answer of the function can
+be computed in the end. To store the immediate value(s) of your calculation, you
+may need to add registers to the system in the next task.
+</p>
+<p>
+Study your required function carefully and design an Finite State Machine (FSM)
+that calculates it using your own ALU from <a href="http://webprojects.eecs.qmul.ac.uk/mtang/EBU6335/lab1.html">Lab 1</a>:
+</p>
+<p>
+<input type="checkbox"> Study the function table of your ALU and work out a list
+of steps that calculates the required functions<br>
+<input type="checkbox"> Draw a state diagram to show your FSM such that each
+step corresponds to a state<br>
+<input type="checkbox"> Create a new VHDL module file. In the beginning of the file, write a comment header block with your name in Pinyin and your BUPT student ID. Also mark down the date of modification<br>
+<input type="checkbox"> Write the entity for the FSM<br>
+<input type="checkbox"> Write the architecture using behaviour modelling technique<br>
+<input type="checkbox"> Synthesise the module and fix any errors/mistakes<br>
+<input type="checkbox"> Create a testbench and simulate the FSM as "Unit Under
+Test (UUT)" to confirm the correctness<br>
+</p>
+
+<h3 id="task2">Task 2: To complete the SAM by connecting FSM with ALU</h3>
+<p>
+Now, you can connect these components together to form the SAM: (i) ALU; (ii)
+FSM; (iii) additional register(s) in the top most module, which has been
+provided as <tt>SAM.vhd</tt>.
+</p>
+<p>
+<input type="checkbox"> Under the comment header block, enter your name in Pinyin and your BUPT student ID. Also write down the date of modification<br>
+<input type="checkbox"> Declare the set of immediate signals that you may need<br>
+<input type="checkbox"> Declare the set of components that you may need<br>
+<input type="checkbox"> Write statements to create instances of ALU and FSM<br>
+<input type="checkbox"> Write statements to infer enough registers<br>
+<input type="checkbox"> Write statements to implement any remaining functions (if any)<br>
+<input type="checkbox"> Write statements to implement any extra function(s)<br>
+<input type="checkbox"> Synthesise the module and fix any errors/mistakes<br>
+<input type="checkbox"> Create a testbench and simulate the module to confirm the correctness.<br>
+</p>
+
+<h3 id="task4">Task 3: Lab Board Verification</h3>
+
+<p>
+Once the synthesis is completed, you can download your design to the board and
+verify the correctness.
+
+The input/output devices are mapped to your ALU as shown below:
+</p>
+<center><img width="700px" src="./EBU6335 Digital System Design - Lab 2_files/lab2_DE10-LITE.png"></center>
+
+<p>Our demonstrators will help you with the working of the lab board.</p>
+
+<h3 id="videodemo">Demonstration Video</h3>
+As part of your submission, you need to prepare a video of <b>no longer than 5 minutes</b> 
+to demonstrate your design.<br>
+The video should contains the following parts:
+<ol>
+<li>A self introduction - your name, student IDs, our module code and the title
+of the lab exercise. <b>Your face must be seen in this part</b>.</li>
+<li>The verification on a lab board - exactly 3 different input tests plus any
+optional part(s) that you have implemented.</li>
+<li>A discussion of your design, referring to your VHDL codes.
+You should show your knowledge about the circuit designed.
+</li>
+</ol>
+<i>You can simply record different video clips using your mobile phone or laptop
+and join them together as your final submission.</i><br>
+
+The following are some guide questions for you to consider:
+<ul>
+<li>How is the ALU used to compute the required functions in different steps?</li>
+<li>What is your design of the Finite State Machine (FSM)?</li>
+<li>How did you test and verify the correctness of your design? How good the coverage (i.e. how many different cases/parts) is your test?</li>
+<li>Do you have any work for the optional parts? For example, to determine
+possible error conditions of your computation?</li>
+</ul>
+
+<p>You are highly recommended to check the <a href="http://webprojects.eecs.qmul.ac.uk/mtang/EBU6335/lab2.html#rubric">rubric</a> for our
+assessment of your demonstration videos</p>
+
+<!--h3 id="report">Report Writing</h3>
+<p>You have to summarise your lab work in a brief report. The report should be
+no more than 4 pages A4 (12 pt. font, single spacing) including all figures or
+pictures. Please prepare and submit your report in PDF.</p>
+
+<p>The focus of the report is to explain how you design the circuit and apply
+VHDL modelling skills in this lab. Also you should discuss how you test (by
+simulation) and verify (using lab board).</p-->
+
+
+<h3 id="submission">Submission</h3>
+
+<p><b>Deadline: Please check QMPlus submission page</b><br>
+Submit all the following (please make sure there is no Chinese characters in the
+filenames and the contents) to <b><a href="https://qmplus.qmul.ac.uk/course/view.php?id=15251" target="_new">QMPlus</a></b>.
+</p><ol>
+<li>VHDL source files (*.vhd) as a single <b>zip</b>: <b>ALL</b> circuit models and testbenches created or modified in this lab</li>
+<li><a href="http://webprojects.eecs.qmul.ac.uk/mtang/EBU6335/lab2.html#videodemo">Video Demonstration</a> (mp4): no more than 5 minutes long.</li>
+</ol>
+<p></p>
+
+<h3 id="rubric">Assessment Rubric</h3>
+
+<p>Full mark for this lab is 10. And your mark will be assessed based on your
+performance during demonstration as well as the quality of your submission
+(report, VHDL source codes, etc.)</p>
+
+<table>
+<tbody><tr><th width="150px">&nbsp;</th>
+    <th width="200px">5</th>
+    <th width="200px">4</th>
+    <th width="200px">3</th>
+    <th width="200px">2</th>
+    <th width="200px">1</th></tr>
+<tr><td>Demonstration<br>5/10</td>
+    <td>Thorough understanding of the design and can propose accurate
+    modification upon a change of specification. Able to implement optional
+    parts to or extension of the design.</td>
+    <td>Good understanding of the design and can explain the structure of the
+    work using the right technical knowledge. Able to manipulate design tools
+    and lab board smoothly.</td>
+    <td>Successful demonstrations of the work but do not show a good understand
+    how the circuit is designed. Able to use design tools and lab board.</td>
+    <td>Minor mistakes in design or demonstrations. Can hardly operate
+    design tools and lab boards. Insufficient understanding about the design.</td>
+    <td>Major mistakes in design or demonstrations. Struggle to explain the
+    design and operate design tools. Weak understanding about the work.</td></tr>
+<tr><td>Design &amp; Source codes<br>5/10</td>
+    <td>A fully correct implementation with excellent documentations that detail
+    the design.</td>
+    <td>A fully correct implementation with some documentations.</td>
+    <td>An acceptable implementation with some minor mistakes but not enough
+    documentations/comments</td>
+    <td>An implementation that realised roughly half of the specification</td>
+    <td>An incorrect design and implementation that fulfill only a small part of the specification. Some design files are missing.</td></tr>
+<!--tr><td>Report<br>3/10</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>A well-written report that discussed all aspects of the lab. Also
+    includes useful original illustrations or diagrams.</td>
+    <td>A decent report that captures the work done in the lab but not in great
+    details.</td>
+    <td>A rough report that is not well organised. Failed to discuss various
+    aspects of the lab work. Includes mistakes in design/discussions.</td></tr-->
+</tbody></table>
+
+<p></p><center>- END -</center><p></p>
+
+<!--div style="float:right;" class="toc">
+<a href="#overview">Overview</a>
+</div---->
+
+
+</body></html>
